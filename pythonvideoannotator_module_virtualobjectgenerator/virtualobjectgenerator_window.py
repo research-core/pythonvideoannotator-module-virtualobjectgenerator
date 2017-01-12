@@ -5,6 +5,7 @@ from pyforms import BaseWidget
 from pyforms.Controls import ControlDir
 from pyforms.Controls import ControlNumber
 from pyforms.Controls import ControlList
+from pyforms.Controls import ControlToolBox
 from pyforms.Controls import ControlCombo
 from pyforms.Controls import ControlSlider
 from pyforms.Controls import ControlPlayer
@@ -19,9 +20,12 @@ from pyforms.Controls import ControlProgress
 from mcvgui.dialogs.simple_filter import SimpleFilter
 from mcvapi.blobs.order_by_position import combinations
 
-from pythonvideoannotator_models_gui.dialogs.paths_and_intervals_selector import PathsAndIntervalsSelectorDialog
-from pythonvideoannotator_models_gui.dialogs.images_selector import ImagesSelectorDialog
+from pythonvideoannotator_models_gui.dialogs import DatasetsDialog
+from pythonvideoannotator_models_gui.dialogs import ImagesDialog
 from mcvapi.filters.background_detector import BackgroundDetector
+from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.contours import Contours
+from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.path import Path
+from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.value import Value
 
 import json
 
@@ -35,9 +39,13 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 		self.setMinimumHeight(400)
 		self.setMinimumWidth(400)
 
-		self._panel			= ControlEmptyWidget('Paths')
-		self._panel_imgs	= ControlEmptyWidget('Images')
+		self._toolbox = ControlToolBox('Tool')
 
+		self._panel_path	= ControlEmptyWidget('Set the object path',  DatasetsDialog(self) )
+		self._panel_area	= ControlEmptyWidget('Set the object area', DatasetsDialog(self) )
+		self._panel_colors  = ControlEmptyWidget('Set the object color', DatasetsDialog(self) )
+		self._panel_imgs	= ControlEmptyWidget('Set the video background', ImagesDialog(self)   )
+		
 		self._outfile 		= ControlFile('Output file')
 		
 		self._player 		= ControlPlayer('Player')
@@ -52,35 +60,42 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 		
 		self._formset = [			
 			[
-				['_panel','_panel_imgs'],'||','_player',
+				'_toolbox','||','_player',
 			],
-			('_usefixedsize','_radius', '_usefixedcolor', '_color', ' '),
 			'_outfile',
 			'_apply',
 			'_progress'
 		]
 
-		self._panel.value 		= self.paths_dialog  = PathsAndIntervalsSelectorDialog(self)
-		self._panel_imgs.value 	= self.images_dialog = ImagesSelectorDialog(self)
+		self._panel_path.value.datasets_filter   = lambda x: isinstance(x, (Contours, Path) )
+		#self._panel_area.value.datasets_filter   = lambda x: isinstance(x, Value )
+		self._panel_colors.value.datasets_filter = lambda x: isinstance(x, (Contours, Path) ) and x.has_colors_avg
+
+		self._toolbox.value = [
+			('PATH',
+				[self._panel_path]										), 
+			('AREA (optional)',
+				[self._panel_area,(self._usefixedsize, self._radius)]	),
+			('COLOR (optional)',
+				[self._panel_colors,(self._usefixedcolor, self._color) ]),
+			('BACKGROUND (optional)',
+				[self._panel_imgs]										)
+		]
 
 		self._apply.value			= self.__apply_event
 		self._apply.icon 			= conf.ANNOTATOR_ICON_PATH
 		self._outfile.changed_event = self.__outputfile_changed_event
 		self._usefixedsize.changed_event = self.__usefixedsize_changed_event
 		self._usefixedcolor.changed_event = self.__usefixedcolor_changed_event
-
+		
 		self._player.process_frame_event = self.__player_process_frame_event
-		self.paths_dialog.video_selection_changed_event = self.__video_selection_changed_event
+
+		self._panel_path.value.video_selection_changed_event = self.__video_selection_changed_event
 		
 		self._apply.enabled = False
 		self._progress.hide()
 		self._radius.hide()
 		self._color.hide()
-
-	def init_form(self):
-		super(VirtualObjectGeneratorWindow, self). init_form()
-		self.paths_dialog.project  = self.mainwindow.project
-		self.images_dialog.project = self.mainwindow.project
 	
 	###########################################################################
 	### EVENTS ################################################################
@@ -89,20 +104,22 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 	def __usefixedcolor_changed_event(self):
 		if self._usefixedcolor.value:
 			self._color.show()
+			self._panel_colors.hide()
 		else:
 			self._color.hide()
+			self._panel_colors.show()
+
 
 	def __usefixedsize_changed_event(self):
 		if self._usefixedsize.value:
 			self._radius.show()
+			self._panel_area.hide()
 		else:
 			self._radius.hide()
-
-
-
+			self._panel_area.show()
 
 	def __outputfile_changed_event(self):
-		video = self.paths_dialog.current_video
+		video = self._panel_path.value.selected_video
 		if video is not None:
 			videofilepath, video_extension = os.path.splitext(video.filename)
 			outfilepath, outfile_extension = os.path.splitext(self._outfile.value)
@@ -115,22 +132,54 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 			self._apply.enabled = False
 
 
+	def __get_object_area(self, path, areas, index):
+		try:
+			if self._usefixedsize.value:
+				area = (self._radius.value**2*math.pi)
+			elif len(areas)>0:
+				a = areas[0]
+				if isinstance(a, Value ):
+					area = a.get_value(index)
+				else:
+					area = a.get_area_value(index)				
+			else:
+				area = path.get_area_value(index)
+			if area is None: raise Exception()
+		except:
+			area = 30**2*math.pi
+		return area
+
+
+	def __get_object_color(self, path, colors, index):
+		try:
+			if self._usefixedcolor.value:
+				color = tuple(eval(self._color.value))
+			elif len(colors)>0:
+				color = colors[0].get_color_avg(index)				
+			else:
+				color = path.get_color_avg(index)
+			if color is None: raise Exception()
+		except:
+			color = 255,255,255
+		return color
+
+
 	def __player_process_frame_event(self, frame):
-		paths = self.paths_dialog.paths
-		images = self.images_dialog.images
-		frame = frame if len(images)!=1 else images[0].image.copy()
+		paths  = self._panel_path.value.datasets
+		areas  = self._panel_area.value.datasets
+		colors = self._panel_colors.value.datasets
+		images = self._panel_imgs.value.images
+
+		frame  = frame if len(images)!=1 else images[0].image.copy()
 
 		if len(paths)==1:
-			index 	 = self._player.video_index
-			path  	 = paths[0]
-			position = path.get_position(index)
-			area  	 = path.get_contour_area_value(index) if not self._usefixedsize.value else (self._radius.value**2*math.pi)
-			try:
-				color = path.get_color_avg(index) if not self._usefixedcolor.value else tuple(eval(self._color.value))
-			except:
-				color = 255,255,255
+			index 		= self._player.video_index			
+			path  	 	= paths[0]
+			position 	= path.get_position(index)
+			area 		= self.__get_object_area(path, areas, index)			
+			color 		= self.__get_object_color(path, colors, index)
 
-			if position is not None and area is not None and color[0] is not None:
+			if position is not None and area is not None and color is not None:
 				radius = int(round(math.sqrt(area/math.pi)))				
 				cv2.circle(frame, position, radius, color, -1)
 
@@ -138,7 +187,7 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 
 
 	def __video_selection_changed_event(self):
-		video = self.paths_dialog.current_video
+		video = self._panel_path.value.selected_video
 		if video is not None:
 			self._player.value = video.video_capture
 			if len(self._outfile.value)>0:
@@ -162,32 +211,30 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 	def __apply_event(self):
 		ok = True
 		
-		if len(self.paths_dialog.paths)<1:
+		if len(self._panel_path.value.datasets)<1:
 			QtGui.QMessageBox.information(self, "Alert", "Please select one path")
 			ok = False
 
-		if len(self.paths_dialog.paths)>1 and ok:
+		if len(self._panel_path.value.datasets)>1 and ok:
 			QtGui.QMessageBox.information(self, "Alert", "Please select only one path")
 			ok = False
 
-		if len(self.images_dialog.images)>1 and ok:
-			QtGui.QMessageBox.information(self, "Alert", "Please select only one image or none")
-			ok = False
 
 		if self._apply.checked and ok:
-			if len(self.images_dialog.images)==1:
-				background = self.images_dialog.images[0].image
-			else:
-				background = None
+			images = self._panel_imgs.value.images
+			background = None if len(images)!=1 else images[0].image.copy()
 
-			self._panel.enabled 		= False
-			self._panel_imgs.enabled 	= False
+			self._toolbox.enabled 		= False
 			self._player.stop()		
 			self._player.enabled 		= False
 			self._outfile.enabled 		= False	
 			self._apply.label 			= 'Cancel'
 
-			for video, (begin,end), paths in self.paths_dialog.selected_data:
+			areas  = self._panel_area.value.datasets
+			colors = self._panel_colors.value.datasets
+			images = self._panel_imgs.value.images
+
+			for video, (begin,end), paths in self._panel_path.value.selected_data:
 				if not self._apply.checked:	break
 
 				self._progress.min = 0
@@ -199,18 +246,13 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 
 				if background is None:
 					size = int(video.video_capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(video.video_capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-					capture = video.video_capture
+					capture = cv2.VideoCapture(video.filepath)
 					capture.set(cv2.CAP_PROP_POS_FRAMES, begin)
 				else:
 					size = background.shape[1], background.shape[0]
 					capture = None
 
 				outputvideo = cv2.VideoWriter(self._outfile.value, codec, fps, size)
-				try:
-					default_color = tuple(eval(self._color.value))
-				except:
-					default_color = 255,255,255
-				default_area = (self._radius.value**2*math.pi)
 
 				for path in paths:
 					if not self._apply.checked:	break
@@ -224,10 +266,10 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 							frame = background.copy()
 
 						position = path.get_position(index)
-						area 	 = path.get_contour_area_value(index) if not self._usefixedsize.value else default_area
-						color = path.get_color_avg(index) if not self._usefixedcolor.value else default_color
-						
-						if position is not None and area is not None and color[0] is not None:
+						area  	 = self.__get_object_area(path, areas, index)			
+						color 	 = self.__get_object_color(path, colors, index)
+
+						if position is not None and area is not None and color is not None:
 							radius = int(round(math.sqrt(area/math.pi)))
 							cv2.circle(frame, position, radius, color, -1)
 
@@ -236,8 +278,7 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 
 				outputvideo.release()
 
-			self._panel.enabled 		= True
-			self._panel_imgs.enabled 	= True
+			self._toolbox.enabled 		= True
 			self._player.enabled 		= True
 			self._outfile.enabled 		= True
 			self._apply.label 			= 'Generate video'

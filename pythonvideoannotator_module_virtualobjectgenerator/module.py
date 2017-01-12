@@ -16,7 +16,7 @@ class Module(object):
 
 
 		self.mainmenu[1]['Modules'].append(
-			{'Virtual object generator': self.virtualobjectgenerator_window.show, 'icon':conf.ANNOTATOR_ICON_PATH },			
+			{'Generate a video with virtual objects': self.virtualobjectgenerator_window.show, 'icon':conf.ANNOTATOR_ICON_MOVIE },			
 		)
 
 
