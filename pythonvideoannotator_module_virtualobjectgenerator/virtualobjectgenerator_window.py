@@ -1,5 +1,5 @@
 import pyforms, math, cv2, os
-from PyQt4 import QtGui
+
 from pysettings import conf
 from pyforms import BaseWidget
 from pyforms.Controls import ControlDir
@@ -27,7 +27,14 @@ from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.cont
 from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.path import Path
 from pythonvideoannotator_models_gui.models.video.objects.object2d.datasets.value import Value
 
-import json
+import simplejson as  json
+
+if conf.PYFORMS_USE_QT5:
+	from PyQt5 import QtGui
+else:
+	from PyQt4 import QtGui
+
+
 
 class VirtualObjectGeneratorWindow(BaseWidget):
 
@@ -35,7 +42,10 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 		super(VirtualObjectGeneratorWindow, self).__init__('Virtual object generator', parent_win=parent)
 		self.mainwindow = parent
 
-		self.layout().setMargin(5)
+		if conf.PYFORMS_USE_QT5:
+			self.layout().setContentsMargins(5,5,5,5)
+		else:
+			self.layout().setMargin(5)
 		self.setMinimumHeight(400)
 		self.setMinimumWidth(400)
 
@@ -172,9 +182,8 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 
 		frame  = frame if len(images)!=1 else images[0].image.copy()
 
-		if len(paths)==1:
-			index 		= self._player.video_index			
-			path  	 	= paths[0]
+		index  = self._player.video_index-1				
+		for path in paths:
 			position 	= path.get_position(index)
 			area 		= self.__get_object_area(path, areas, index)			
 			color 		= self.__get_object_color(path, colors, index)
