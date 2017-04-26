@@ -10,6 +10,7 @@ from pyforms.Controls import ControlCombo
 from pyforms.Controls import ControlSlider
 from pyforms.Controls import ControlPlayer
 from pyforms.Controls import ControlFile
+from pyforms.Controls import ControlDir
 from pyforms.Controls import ControlText
 from pyforms.Controls import ControlButton
 from pyforms.Controls import ControlCheckBox
@@ -56,7 +57,9 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 		self._panel_colors  = ControlEmptyWidget('Set the object color', DatasetsDialog(self) )
 		self._panel_imgs	= ControlEmptyWidget('Set the video background', ImagesDialog(self)   )
 		
-		self._outfile 		= ControlFile('Output file')
+		self._codec 		= ControlCheckBox('Force AVI')
+		self._outdir 		= ControlDir('Output directory')
+		self._outfile 		= ControlText('Output file name')
 		
 		self._player 		= ControlPlayer('Player')
 		self._progress  	= ControlProgress('Progress')
@@ -72,10 +75,12 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 			[
 				'_toolbox','||','_player',
 			],
-			'_outfile',
+			'_outdir',
+			('_outfile','_codec'),
 			'_apply',
 			'_progress'
 		]
+
 
 		self._panel_path.value.datasets_filter   = lambda x: isinstance(x, (Contours, Path) )
 		#self._panel_area.value.datasets_filter   = lambda x: isinstance(x, Value )
@@ -101,6 +106,7 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 		self._player.process_frame_event = self.__player_process_frame_event
 
 		self._panel_path.value.video_selection_changed_event = self.__video_selection_changed_event
+		self._codec.changed_event = self.__video_selection_changed_event
 		
 		self._apply.enabled = False
 		self._progress.hide()
@@ -202,6 +208,9 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 			if len(self._outfile.value)>0:
 				videofilepath, video_extension = os.path.splitext(video.filename)
 				outfilepath, outfile_extension = os.path.splitext(self._outfile.value)
+
+				if self._codec.value==True: video_extension = '.avi'
+
 				if len(outfilepath)>0:
 					self._outfile.value = (outfilepath+video_extension)
 					self._apply.enabled = True
@@ -261,7 +270,10 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 					size = background.shape[1], background.shape[0]
 					capture = None
 
-				outputvideo = cv2.VideoWriter(self._outfile.value, codec, fps, size)
+				if self._codec.value==True: codec = cv2.VideoWriter_fourcc(*'MJPG')
+
+				outfilename = os.path.join(self._outdir.value, self._outfile.value)
+				outputvideo = cv2.VideoWriter(outfilename, codec, fps, size)
 
 				for path in paths:
 					if not self._apply.checked:	break
