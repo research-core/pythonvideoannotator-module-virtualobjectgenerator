@@ -79,7 +79,7 @@ class VirtualObjectGeneratorWindow(BaseWidget):
 
 		self._panel_path.value.datasets_filter   = lambda x: isinstance(x, (Contours, Path) )
 		#self._panel_area.value.datasets_filter   = lambda x: isinstance(x, Value )
-		self._panel_colors.value.datasets_filter = lambda x: isinstance(x, (Contours, Path) ) and x.has_colors_avg
+		self._panel_colors.value.datasets_filter = lambda x: isinstance(x, (Contours, Path) ) and hasattr(x, 'has_colors_avg') and x.has_colors_avg
 
 		self._toolbox.value = [
 			('PATH',
