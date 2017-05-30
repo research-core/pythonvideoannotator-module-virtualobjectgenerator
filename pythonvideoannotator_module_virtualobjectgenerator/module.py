@@ -1,6 +1,6 @@
 import cv2
 from pysettings import conf
-from pythonvideoannotator_module_virtualobjectgenerator.virtualobjectgenerator_window import VirtualObjectGeneratorWindow
+from pythonvideoannotator_module_virtualobjectgenerator.videosexporter.videosexporter_gui import VideosExporterGui
 
 
 class Module(object):
@@ -12,11 +12,11 @@ class Module(object):
 		super(Module, self).__init__()
 
 
-		self.virtualobjectgenerator_window = VirtualObjectGeneratorWindow(self)
+		self.virtualobjectgenerator_window = VideosExporterGui(self)
 
 
 		self.mainmenu[1]['Modules'].append(
-			{'Generate a video with virtual objects': self.virtualobjectgenerator_window.show, 'icon':conf.ANNOTATOR_ICON_MOVIE },			
+			{'Export videos': self.virtualobjectgenerator_window.show, 'icon':conf.ANNOTATOR_ICON_MOVIE },			
 		)
 
 
