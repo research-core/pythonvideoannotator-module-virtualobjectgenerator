@@ -14,6 +14,7 @@ class Module(object):
 
 		self.virtualobjectgenerator_window = VideosExporterGui(self)
 
+		self.mainmenu[1]['Modules'].append('-')
 
 		self.mainmenu[1]['Modules'].append(
 			{'Export videos': self.virtualobjectgenerator_window.show, 'icon':conf.ANNOTATOR_ICON_MOVIE },			

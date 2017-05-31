@@ -85,7 +85,7 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 			('CIRCLE COLOR (optional)', 	[self._panel_colors,(self._usefixedcolor, self._color)]),
 			('BACKGROUND (optional)',		[self._panel_imgs]),
 			('DRAW EVENTS (optional)',		[self._evtsreload1, self._drawevents, self._eventstitles]),
-			('SPLIT BY EVENTS (optional)',	[self._evtsreload2, self._splitevents]),			
+			('SPLIT FILES BY EVENTS (optional)', [self._evtsreload2, self._splitevents]),			
 		]
 
 
@@ -94,19 +94,22 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 		self._panel_colors.value.datasets_filter = lambda x: isinstance(x, (Contours, Path) ) and hasattr(x, 'has_colors_avg') and x.has_colors_avg
 
 		### Set the controls events #############################################
-		self._evtsreload1.value 		    = self.__reload_events
-		self._evtsreload2.value 		    = self.__reload_events
-		self._outfile.changed_event 		= self.outputfile_changed_event
-		self._usefixedsize.changed_event 	= self.__usefixedsize_changed_event
-		self._usefixedcolor.changed_event 	= self.__usefixedcolor_changed_event
-		self._splitevents.selection_changed_event = self.outputfile_changed_event
+		self._evtsreload1.value 		    				 = self.__reload_events
+		self._evtsreload2.value 		    				 = self.__reload_events
+		self._outfile.changed_event 						 = self.outputfile_changed_event
+		self._usefixedsize.changed_event 					 = self.__usefixedsize_changed_event
+		self._usefixedcolor.changed_event 					 = self.__usefixedcolor_changed_event
+		self._splitevents.selection_changed_event 			 = self.outputfile_changed_event
 		self._panel_path.value.video_selection_changed_event = self.__video_selection_changed_event
-		self._codec.changed_event = self.__video_selection_changed_event
+		self._codec.changed_event 							 = self.__video_selection_changed_event
 		## function from VideosExporterProcess class
-		self._apply.value				 = self.apply_event 			
+		self._apply.value				 					 = self.apply_event 			
 		## function from VideosExporterPreview class
-		self._player.process_frame_event = self.player_processframe_event
+		self._player.process_frame_event 					 = self.player_processframe_event
 				
+		self._evtsreload1.icon 	= conf.ANNOTATOR_ICON_REFRESH
+		self._evtsreload2.icon 	= conf.ANNOTATOR_ICON_REFRESH
+		
 		self._progress.hide()
 		self._radius.hide()
 		self._color.hide()
