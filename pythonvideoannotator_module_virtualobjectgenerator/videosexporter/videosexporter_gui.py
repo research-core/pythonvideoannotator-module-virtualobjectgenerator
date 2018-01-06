@@ -34,12 +34,12 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 
 		self._toolbox 		= ControlToolBox('Tool')
 
-		self._panel_area	= ControlEmptyWidget('Set the object area', 	 DatasetsDialog(self))
-		self._panel_colors  = ControlEmptyWidget('Set the object color', 	 DatasetsDialog(self))
-		self._panel_imgs	= ControlEmptyWidget('Set the video background', ImagesDialog(self)  )
+		self._panel_area	= ControlEmptyWidget('Set the object area', 	 default=DatasetsDialog(self))
+		self._panel_colors  = ControlEmptyWidget('Set the object color', 	 default=DatasetsDialog(self))
+		self._panel_imgs	= ControlEmptyWidget('Set the video background', default=ImagesDialog(self)  )
 		
 		#### path panel ################################################
-		self._panel_path	= ControlEmptyWidget('Set the object path',  DatasetsDialog(self) )
+		self._panel_path	= ControlEmptyWidget('Set the object path',  default=DatasetsDialog(self) )
 		self._drawpath 		= ControlCheckBox('Draw paths')
 		################################################################
 
@@ -67,8 +67,8 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 		
 		self._usefixedsize  = ControlCheckBox('Use a fixed size')
 		self._usefixedcolor = ControlCheckBox('Use a fixed color')
-		self._radius		= ControlSlider('Circle radius', 10, 1, 300)
-		self._color			= ControlText('BGR color', '255,255,255')
+		self._radius		= ControlSlider('Circle radius', default=10,  minimum=1, maximum=300)
+		self._color			= ControlText('BGR color', default='255,255,255')
 		
 		self.formset = [			
 			('_toolbox','||','_player'),
