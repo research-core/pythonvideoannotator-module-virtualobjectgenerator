@@ -1,10 +1,9 @@
-import math, cv2, os
+import math, cv2, os, AnyQt
 
 from pysettings import conf
-if conf.PYFORMS_USE_QT5:
-	from PyQt5.QtWidgets import QMessageBox
-else:
-	from PyQt5.QtGui import QMessageBox
+if conf.PYFORMS_MODE=='GUI':
+	from AnyQt.QtWidgets import QMessageBox
+
 
 class VideosExporterProcess(object):
 
