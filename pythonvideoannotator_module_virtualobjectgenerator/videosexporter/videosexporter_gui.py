@@ -2,16 +2,16 @@ import pyforms, math, os
 
 from pysettings import conf
 from pyforms import BaseWidget
-from pyforms.Controls import ControlToolBox
-from pyforms.Controls import ControlSlider
-from pyforms.Controls import ControlPlayer
-from pyforms.Controls import ControlDir
-from pyforms.Controls import ControlText
-from pyforms.Controls import ControlButton
-from pyforms.Controls import ControlCheckBox
-from pyforms.Controls import ControlCheckBoxList
-from pyforms.Controls import ControlEmptyWidget
-from pyforms.Controls import ControlProgress
+from pyforms.controls import ControlToolBox
+from pyforms.controls import ControlSlider
+from pyforms.controls import ControlPlayer
+from pyforms.controls import ControlDir
+from pyforms.controls import ControlText
+from pyforms.controls import ControlButton
+from pyforms.controls import ControlCheckBox
+from pyforms.controls import ControlCheckBoxList
+from pyforms.controls import ControlEmptyWidget
+from pyforms.controls import ControlProgress
 
 from pythonvideoannotator_models_gui.dialogs import DatasetsDialog
 from pythonvideoannotator_models_gui.dialogs import ImagesDialog
