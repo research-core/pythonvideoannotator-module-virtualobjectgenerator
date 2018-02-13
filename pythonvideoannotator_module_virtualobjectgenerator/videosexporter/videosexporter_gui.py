@@ -1,6 +1,6 @@
 import pyforms, math, os
 
-from pysettings import conf
+from pyforms import conf
 from pyforms import BaseWidget
 from pyforms.controls import ControlToolBox
 from pyforms.controls import ControlSlider

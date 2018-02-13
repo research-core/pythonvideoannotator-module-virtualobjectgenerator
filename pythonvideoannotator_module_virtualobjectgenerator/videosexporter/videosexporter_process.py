@@ -1,6 +1,6 @@
 import math, cv2, os, AnyQt
 
-from pysettings import conf
+from pyforms import conf
 if conf.PYFORMS_MODE=='GUI':
 	from AnyQt.QtWidgets import QMessageBox
 
