@@ -1,5 +1,5 @@
 import cv2
-from pyforms import conf
+from confapp import conf
 from pythonvideoannotator_module_virtualobjectgenerator.videosexporter.videosexporter_gui import VideosExporterGui
 
 

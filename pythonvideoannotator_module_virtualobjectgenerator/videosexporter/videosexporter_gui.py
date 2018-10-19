@@ -1,7 +1,7 @@
 import pyforms, math, os
 
-from pyforms import conf
-from pyforms import BaseWidget
+from confapp import conf
+from pyforms.basewidget import BaseWidget
 from pyforms.controls import ControlToolBox
 from pyforms.controls import ControlSlider
 from pyforms.controls import ControlPlayer
