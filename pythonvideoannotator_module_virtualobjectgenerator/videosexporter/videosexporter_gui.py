@@ -80,12 +80,12 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 		]
 
 		self._toolbox.value = [
-			('PATH', 						[self._panel_path,  self._drawpath]), 
-			('CIRCLE (optional)', 			[self._panel_area,  (self._usefixedsize, self._radius)]),
-			('CIRCLE COLOR (optional)', 	[self._panel_colors,(self._usefixedcolor, self._color)]),
-			('BACKGROUND (optional)',		[self._panel_imgs]),
-			('DRAW EVENTS (optional)',		[self._evtsreload1, self._drawevents, self._eventstitles]),
-			('SPLIT FILES BY EVENTS (optional)', [self._evtsreload2, self._splitevents]),			
+			('Path', 						[self._panel_path,  self._drawpath]), 
+			('Circle (optional)', 			[self._panel_area,  (self._usefixedsize, self._radius)]),
+			('Circle color (optional)', 	[self._panel_colors,(self._usefixedcolor, self._color)]),
+			('Background (optional)',		[self._panel_imgs]),
+			('Draw events (optional)',		[self._evtsreload1, self._drawevents, self._eventstitles]),
+			('Split files by events (optional)', [self._evtsreload2, self._splitevents]),			
 		]
 
 
