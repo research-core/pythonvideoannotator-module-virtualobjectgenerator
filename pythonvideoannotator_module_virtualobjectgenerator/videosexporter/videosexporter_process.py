@@ -42,7 +42,7 @@ class VideosExporterProcess(object):
 					# use the events to cut the video
 					totalframes = 0
 					for row in timeline.rows:
-						for event in row.periods:
+						for event in row.events:
 							if event.end<=begin: continue
 							if event.begin>=end: continue
 							if event.title not in selected_events: continue

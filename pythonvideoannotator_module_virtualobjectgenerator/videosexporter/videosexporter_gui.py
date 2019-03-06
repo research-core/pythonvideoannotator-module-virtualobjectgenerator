@@ -128,7 +128,7 @@ class VideosExporterGui(BaseWidget, VideosExporterPreview, VideosExporterProcess
 
 		events 	 = {}
 		for row in rows:
-			for event in row.periods:
+			for event in row.events:
 				events[event.title] = True
 
 		events = sorted(events.keys())

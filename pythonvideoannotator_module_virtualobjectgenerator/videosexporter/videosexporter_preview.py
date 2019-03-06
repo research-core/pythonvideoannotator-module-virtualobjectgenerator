@@ -49,7 +49,7 @@ class VideosExporterPreview(object):
 		higher_y, lower_y  = None, None
 		
 		for row in timeline.rows:
-			for event in row.periods:
+			for event in row.events:
 				if event.title in self._drawevents.value and event.in_range(begin, end):
 
 					line_y = int(img_height - 25 - 15*event.track)
