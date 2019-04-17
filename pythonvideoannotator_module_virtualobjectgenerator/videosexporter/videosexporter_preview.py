@@ -52,13 +52,13 @@ class VideosExporterPreview(object):
 			for event in row.events:
 				if event.title in self._drawevents.value and event.in_range(begin, end):
 
-					line_y = int(img_height - 25 - 15*event.track)
+					line_y = int(img_height - 25 - 15*event.track.index)
 
 					if higher_y is None or line_y>higher_y: higher_y = line_y
 					if lower_y is None or line_y<lower_y:   lower_y  = line_y
 
-					x, y   = int(half_img + event.begin - index), int(img_height - 25 - 15*event.track)
-					xx, yy = int(half_img + event.end - index),   int(img_height - 25 - 15*event.track)
+					x, y   = int(half_img + event.begin - index), int(img_height - 25 - 15*event.track.index)
+					xx, yy = int(half_img + event.end - index),   int(img_height - 25 - 15*event.track.index)
 					cv2.rectangle(frame, (x,y),(xx,yy+4), event.bgrcolor, -1)
 
 					if self._eventstitles.value:
