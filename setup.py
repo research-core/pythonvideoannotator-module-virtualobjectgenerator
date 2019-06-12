@@ -9,7 +9,7 @@ with open('README.md', 'r') as fd:
 
 setup(
 	name='Python video annotator - module - virtual object generator',
-	version="0.4",
+	version="0.5",
 	description="""""",
 	author=['Ricardo Ribeiro'],
 	author_email='ricardojvr@gmail.com',
